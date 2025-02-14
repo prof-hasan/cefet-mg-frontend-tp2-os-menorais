@@ -1,4 +1,31 @@
+<?php
+session_start();
+include('backend/db.php');
 
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $nome = $_POST['nome'];
+    $senha = $_POST['senha'];
+
+    $sql = "SELECT * FROM usuarios WHERE nome = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $nome);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $usuario = $result->fetch_assoc();
+        if (password_verify($senha, $usuario['senha'])) {
+            $_SESSION['usuario'] = $usuario;
+            header("Location: paginaLivros.php");
+            exit();
+        } else {
+            $erro = "Senha incorreta!";
+        }
+    } else {
+        $erro = "Usuário não encontrado!";
+    }
+}
+?>
 
 <!DOCTYPE html>
 <html>
